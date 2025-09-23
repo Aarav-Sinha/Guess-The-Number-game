@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the Number</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ff6a00, #ee0979, #7b2ff7, #00c6ff);
+            background-size: 400% 400%;
+            animation: gradientBG 12s ease infinite;
+            color: #fff;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #game-box {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 35px 25px;
+            width: 380px;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 18px;
+            font-size: 26px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        label {
+            font-size: 15px;
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        input {
+            padding: 12px;
+            width: 85%;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.85);
+            color: #333;
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff512f, #dd2476);
+            border: none;
+            padding: 12px 22px;
+            margin: 8px 6px;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #ff9966, #ff5e62);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+        }
+
+        .msg {
+            margin-top: 18px;
+            font-weight: bold;
+            min-height: 32px;
+            font-size: 16px;
+        }
+
+        #footer {
+            position: fixed;
+            bottom: 12px;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.85);
+            letter-spacing: 0.5px;
+        }
+
+        #footer::before {
+            content: "";
+            display: block;
+            margin: 0 auto 8px;
+            width: 60px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+        }
+
+        /* 🎉 Confetti animation */
+        @keyframes confetti {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(200px) rotate(720deg); opacity: 0; }
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: 0;
+            animation: confetti 2s linear forwards;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-box">
+        <h2>🎯 Guess the Number</h2>
+        <label>Enter No. of Guesses you require:</label>
+        <input type="number" id="maxGuesses" min="1" max="20" placeholder="e.g. 7">
+        <br>
+        <button id="startBtn" onclick="startGame()">🚀 Start Game</button>
+        
+        <div id="game" style="display:none;">
+            <p><b>Attempt:</b> <span id="attempt">0</span>/<span id="max"></span></p>
+            <div id="timer-container"></div>
+            <input type="number" id="guess" placeholder="Enter guess (1-100)">
+            <br>
+            <button onclick="checkGuess()">✅ Submit Guess</button>
+            <button onclick="restartGame()">🔄 Restart</button>
+            <div class="msg" id="message"></div>
+        </div>
+    </div>
+
+    <div id="footer">⚡ Developed by Aarav Sinha</div>
+    <script>
+        let randomNumber, attempts, maxAttempts, gameActive;
+        let restartTimer, countdownTimer, confettiInterval;
+
+        function startGame() {
+            clearTimersAndEffects();
+            
+            maxAttempts = parseInt(document.getElementById("maxGuesses").value);
+
+            if (isNaN(maxAttempts) || maxAttempts < 1 || maxAttempts > 20) {
+                alert("⚠️ Please enter a number of guesses between 1 and 20.");
+                return;
+            }
+
+            randomNumber = Math.floor(Math.random() * 100) + 1;
+            attempts = 0;
+            gameActive = true;
+            
+            document.getElementById("game").style.display = "block";
+            document.getElementById("max").innerText = maxAttempts;
+            document.getElementById("attempt").innerText = attempts;
+            document.getElementById("message").innerText = "🎮 Game Started! Good Luck!";
+            document.getElementById("guess").value = "";
+
+            document.getElementById("maxGuesses").setAttribute("disabled", true);
+            document.getElementById("startBtn").style.display = "none";
+            
+            document.getElementById("timer-container").innerHTML = "";
+        }
+
+        function checkGuess() {
+            if (!gameActive) return;
+
+            const guess = parseInt(document.getElementById("guess").value);
+            if (isNaN(guess) || guess < 1 || guess > 100) {
+                document.getElementById("message").innerText = "⚠️ Enter a number between 1 and 100!";
+                return;
+            }
+
+            attempts++;
+            document.getElementById("attempt").innerText = attempts;
+
+            if (guess === randomNumber) {
+                document.getElementById("message").innerText = "🎉 Hoorayyy! You got the number!";
+                gameActive = false;
+                startConfetti();
+                startAutoRestartTimer();
+            } else if (attempts >= maxAttempts) {
+                document.getElementById("message").innerText = `❌ Out of guesses! The number was ${randomNumber}`;
+                gameActive = false;
+                // Confetti is no longer called on a failed guess.
+                startAutoRestartTimer();
+            } else if (guess > randomNumber + 15) {
+                document.getElementById("message").innerText = "⬆️ Too High!";
+            } else if (guess < randomNumber - 20) {
+                document.getElementById("message").innerText = "⬇️ Too Low!";
+            } else if (guess > randomNumber - 20 && guess < randomNumber) {
+                document.getElementById("message").innerText = "✨ Almost! But still low.";
+            } else if (guess < randomNumber + 20 && guess > randomNumber) {
+                document.getElementById("message").innerText = "✨ Almost! But still high.";
+            }
+        }
+
+        function restartGame() {
+            clearTimersAndEffects();
+            
+            document.getElementById("game").style.display = "none";
+            document.getElementById("maxGuesses").value = "";
+            document.getElementById("guess").value = "";
+            document.getElementById("message").innerText = "";
+            document.getElementById("maxGuesses").removeAttribute("disabled");
+            document.getElementById("startBtn").style.display = "inline-block";
+        }
+
+        function clearTimersAndEffects() {
+            clearTimeout(restartTimer);
+            clearInterval(countdownTimer);
+            clearInterval(confettiInterval);
+            
+            const allConfetti = document.querySelectorAll(".confetti");
+            allConfetti.forEach(c => c.remove());
+        }
+
+        function startAutoRestartTimer() {
+            let timeLeft = 10;
+            document.getElementById("timer-container").innerHTML = `<p><b>Redirecting in:</b> <span id="timer">${timeLeft}</span></p>`;
+            
+            const timerSpan = document.getElementById("timer");
+            countdownTimer = setInterval(() => {
+                timeLeft--;
+                timerSpan.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    restartGame();
+                }
+            }, 1000);
+        }
+        
+        function startConfetti() {
+            confettiInterval = setInterval(() => {
+                for (let i = 0; i < 5; i++) {
+                    let confetti = document.createElement("div");
+                    confetti.className = "confetti";
+                    confetti.style.left = Math.random() * window.innerWidth + "px";
+                    confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 2500); 
+                }
+            }, 200);
+        }
+    </script>
+</body>
+</html>
