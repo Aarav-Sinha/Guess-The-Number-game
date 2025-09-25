@@ -3,19 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guess the Number</title>
+    <title>Guess Master Protocol</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            /* Muted, Professional Dark Theme Palette */
+            --color-dark-bg: #1c2a4a;
+            --color-primary: #3f68a8;       /* Muted Blue */
+            --color-secondary: #00bcd4;     /* Cyan Accent */
+            --color-accent: #ff9800;        /* Gold/Orange Accent */
+            --color-error: #f44336;
+            --color-success: #8bc34a;
+            --color-text-light: #e0e6f0;
+            --box-background: rgba(25, 35, 55, 0.6); /* Adjusted opacity from 0.8 to 0.6 */
+            --chat-bg: #101a2e; /* Very dark blue for chat modal */
+            --chat-accent: #4CAF50; /* Green accent for chat icon/header */
+        }
+
         body {
             margin: 0;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #ff6a00, #ee0979, #7b2ff7, #00c6ff);
+            font-family: 'Montserrat', sans-serif;
+            
+            background: linear-gradient(135deg, #1f4037, #991c49, #4a00e0, #2b32b2);
             background-size: 400% 400%;
-            animation: gradientBG 12s ease infinite;
-            color: #fff;
+            animation: gradientBG 15s ease infinite;
+            color: var(--color-text-light);
+            overflow: hidden; 
         }
 
         @keyframes gradientBG {
@@ -25,126 +42,535 @@
         }
 
         #game-box {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            padding: 35px 25px;
-            width: 380px;
-            box-shadow: 0px 10px 30px rgba(0,0,0,0.3);
+            background: var(--box-background);
+            backdrop-filter: blur(18px); 
+            border-radius: 15px; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            padding: 35px 45px;
+            width: 350px; 
+            box-shadow: 0 0 50px rgba(0,0,0,0.7); 
             text-align: center;
+            position: relative; 
+            height: auto; 
+            overflow: hidden; 
+            transition: all 0.3s ease;
+            z-index: 1; 
         }
-
+        
         h2 {
-            margin-bottom: 18px;
+            margin-bottom: 5px;
             font-size: 26px;
-            font-weight: 600;
-            letter-spacing: 1px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 188, 212, 0.5); 
+        }
+        
+        #high-score-display {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 30px;
+            color: var(--color-secondary);
+            text-transform: uppercase;
         }
 
         label {
-            font-size: 15px;
+            font-size: 14px;
             display: block;
-            margin: 10px 0 5px;
+            margin: 18px 0 10px;
+            font-weight: 500;
+            color: var(--color-text-light);
+            opacity: 0.8;
         }
 
         input {
-            padding: 12px;
+            padding: 14px;
             width: 85%;
-            margin: 10px 0;
-            border-radius: 10px;
+            margin: 0 auto 25px;
+            border-radius: 8px;
             border: none;
             outline: none;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: 700;
             text-align: center;
-            background: rgba(255, 255, 255, 0.85);
-            color: #333;
+            background: rgba(255, 255, 255, 0.05); 
+            color: #fff;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            transition: all 0.2s ease;
+            max-width: 250px;
+        }
+        input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 2px var(--color-secondary), inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+        input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
         }
 
         button {
-            background: linear-gradient(45deg, #ff512f, #dd2476);
+            background: var(--color-primary);
             border: none;
             padding: 12px 22px;
             margin: 8px 6px;
-            border-radius: 10px;
-            color: white;
-            font-size: 16px;
-            font-weight: 500;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
             cursor: pointer;
             transition: 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-        }
-
-        button:hover {
-            background: linear-gradient(45deg, #ff9966, #ff5e62);
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 6px 14px rgba(0,0,0,0.35);
-        }
-
-        .msg {
-            margin-top: 18px;
-            font-weight: bold;
-            min-height: 32px;
-            font-size: 16px;
-        }
-
-        #footer {
-            position: fixed;
-            bottom: 12px;
-            width: 100%;
-            text-align: center;
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            text-transform: uppercase;
             letter-spacing: 0.5px;
+            min-width: 120px;
+        }
+        
+        /* --- FIXED BUTTONS (RULE & HISTORY) --- */
+        .fixed-btn {
+            position: fixed; background: var(--color-primary);
+            border: none; padding: 10px 18px; border-radius: 8px; color: #fff;
+            font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 101; margin: 0;
+            text-transform: uppercase;
+        }
+        
+        /* Right Side Buttons (Rules, History) */
+        #infoBtn { top: 20px; right: 20px; }
+        #historyBtn { top: 75px; right: 20px; background: var(--color-accent); display: none; }
+        #historyBtn:hover { background: #e68900; }
+
+        /* --- CHAT BOT ICON (BOTTOM RIGHT) --- */
+        #chatIcon {
+            position: fixed;
+            bottom: 20px; 
+            right: 20px; 
+            width: 50px; height: 50px; 
+            border-radius: 50%;
+            background: var(--chat-accent);
+            color: white;
+            font-size: 24px;
+            line-height: 50px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: transform 0.2s, background 0.2s;
+            z-index: 150;
+        }
+        #chatIcon:hover {
+            transform: scale(1.05);
+            background: #388e3c;
         }
 
-        #footer::before {
-            content: "";
-            display: block;
-            margin: 0 auto 8px;
-            width: 60px;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.5);
+        /* --- FIXED RULES & HISTORY PANELS VISIBILITY (FIXED LOG ISSUE) --- */
+        .fixed-panel-common {
+            position: fixed; top: 65px; right: 20px; width: 300px; 
+            background: rgba(0, 0, 0, 0.9); border-radius: 10px; padding: 20px; 
+            text-align: left; font-size: 14px; line-height: 1.6; 
+            color: var(--color-text-light); z-index: 100; opacity: 0; 
+            visibility: hidden; transition: 0.3s ease; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+            /* Initial state: pushed off-screen */
+            transform: translateX(100%); 
+        }
+
+        .fixed-panel-common.visible { 
+            opacity: 1; 
+            visibility: visible; 
+            transform: translateX(0); /* Final state: visible */
+        }
+        
+        #instructions {
+            border-left: 3px solid var(--color-secondary);
+        }
+
+        #historyPanel {
+            top: 120px; /* Lower than instructions */
+            max-height: 400px; 
+            padding: 15px; 
+            border-left: 3px solid var(--color-accent); 
+        }
+        
+        #guesses-list {
+            overflow-y: auto; max-height: 360px; padding-right: 5px; font-size: 13px; 
+        }
+        .history-entry { 
+            display: block; margin: 3px 0; padding: 2px 0; 
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+        .history-entry strong { 
+            color: #fff;
+        }
+
+        /* --- CHAT BOT MODAL (V6.0) --- */
+        #chatModal {
+            position: fixed;
+            bottom: 90px; /* Opens above the icon */
+            right: 20px;
+            width: 350px;
+            height: 450px;
+            background: var(--chat-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 140;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s ease-out;
+            transform-origin: bottom right;
+        }
+
+        #chatModal.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+        
+        #chatHeader {
+            background: var(--chat-accent);
+            color: white;
+            padding: 15px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #chatClose {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            transition: opacity 0.2s;
+        }
+        #chatClose:hover { opacity: 0.8; }
+        
+        #chatBody {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        #chatBody::-webkit-scrollbar { width: 4px; }
+        #chatBody::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+
+        .ai-message {
+            background: #283655; /* Darker background for chat bubbles */
+            padding: 12px;
             border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.5;
         }
+        .ai-message strong { color: var(--color-secondary); }
+        
+        .chat-option-btn {
+            display: block;
+            width: 100%;
+            margin: 8px 0;
+            padding: 10px;
+            background: #334466; 
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .chat-option-btn:hover { background: var(--color-primary); }
+        
+        .chat-info-panel {
+            color: var(--color-text-light);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+        
+        /* Specific content styles */
+        .chat-info-panel h4 { margin: 5px 0 10px; font-size: 16px; text-align: center; color: var(--color-secondary); }
+        .chat-info-panel p { margin: 8px 0; display: flex; justify-content: space-between; font-weight: 500;}
+        .chat-info-panel span { font-weight: 700; color: #fff; }
+        .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px dashed rgba(255,255,255,0.1); }
+        .faq-q { font-weight: 700; color: #fff; margin-top: 10px; }
+        .faq-a { font-size: 13px; margin-bottom: 10px; color: rgba(255,255,255,0.8); }
 
-        /* 🎉 Confetti animation */
-        @keyframes confetti {
-            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(200px) rotate(720deg); opacity: 0; }
+        /* Footer remains fixed */
+        #footer {
+            position: fixed; bottom: 15px; width: 100%; text-align: center; font-size: 13px;
+            color: rgba(255, 255, 255, 0.7); letter-spacing: 1.5px; z-index: 50;
         }
-
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            top: 0;
-            animation: confetti 2s linear forwards;
+        #footer::before, #footer::after {
+            content: "—";
+            display: inline-block;
+            margin: 0 10px;
+            color: rgba(255, 255, 255, 0.3);
+            font-weight: 500;
         }
+        /* Confetti styles */
+        @keyframes confetti { 0% { transform: translateY(-100px) rotate(0deg); opacity: 1; } 100% { transform: translateY(200px) rotate(720deg); opacity: 0; } }
+        .confetti { position: absolute; width: 10px; height: 10px; top: 0; animation: confetti 2s linear forwards; }
     </style>
 </head>
 <body>
-    <div id="game-box">
-        <h2>🎯 Guess the Number</h2>
-        <label>Enter No. of Guesses you require:</label>
-        <input type="number" id="maxGuesses" min="1" max="20" placeholder="e.g. 7">
-        <br>
-        <button id="startBtn" onclick="startGame()">Start Game</button>
-        
-        <div id="game" style="display:none;">
-            <p><b>Attempt:</b> <span id="attempt">0</span>/<span id="max"></span></p>
-            <div id="timer-container"></div>
-            <input type="number" id="guess" placeholder="Enter guess (1-100)">
-            <br>
-            <button onclick="checkGuess()">✅ Submit Guess</button>
-            <button onclick="restartGame()">🔄 Restart</button>
-            <div class="msg" id="message"></div>
+    
+    <button id="infoBtn" class="fixed-btn">Protocol | RULES</button>
+    <button id="historyBtn" class="fixed-btn">📊 VIEW LOG</button>
+    
+    <div id="chatIcon" onclick="toggleChatModal()">💬</div>
+    
+    
+    <div id="instructions" class="fixed-panel-common">
+        <strong>PROTOCOL GUIDELINES</strong><br>
+        <p>Your objective is to deduce the **secret 2-digit number** (1 to 100) generated by the central system.</p>
+        <ul>
+            <li>**Difficulty:** Set the number of attempts (1-20) before activation.</li>
+            <li>**Feedback Loop:** The system provides real-time feedback (Too High/Low, Almost) to guide your next input.</li>
+            <li>**Completion:** Successful deduction within the set attempts results in mission success.</li>
+        </ul>
+        <hr style="border-color: rgba(255,255,255,0.2); margin-top: 15px;">
+        <small style="display: block; text-align: center; color: var(--color-text-light);">System developer: Aarav Sinha</small>
+    </div>
+
+    <div id="historyPanel" class="fixed-panel-common">
+        <h3>GUESS LOG (Newest First)</h3>
+        <div id="guesses-list">No attempts logged yet.</div>
+    </div>
+
+
+    <div id="chatModal">
+        <div id="chatHeader">
+            <span>🤖 AI Assistant: Cipher Support</span>
+            <button id="chatClose" onclick="closeChatModal()">✕</button>
+        </div>
+        <div id="chatBody">
+            
+            <div id="aiGreeting" class="ai-message">
+                Hello! I am the **Cipher Support AI**. How can I assist you with the Guess Master Protocol?
+            </div>
+            
+            <div id="chat-menu-options">
+                <button class="chat-option-btn" onclick="showChatContent('stats')">📈 Check Protocol Metrics (Stats)</button>
+                <button class="chat-option-btn" onclick="showChatContent('faq')">❓ Review Support FAQ</button>
+                <button class="chat-option-btn" onclick="showChatContent('settings')">⚙️ Adjust User Settings</button>
+                <button class="chat-option-btn" onclick="showChatContent('lore')">🌐 Read Mission Briefing (Lore)</button>
+            </div>
+
+            <div id="chatContentArea" style="display: none;">
+                
+                <div id="statsPanelContent" class="chat-info-panel" style="display:none;">
+                    <h4>PROTOCOL METRICS</h4>
+                    <p>Games Played: <span id="stat-games">0</span></p>
+                    <p>Total Wins: <span id="stat-wins">0</span></p>
+                    <p>Win Rate: <span id="stat-winrate">0%</span></p>
+                    <p>Current Streak: <span id="stat-streak">0</span></p>
+                    <p>Longest Streak: <span id="stat-max-streak">0</span></p>
+                    <button onclick="resetAllStats()" style="background: var(--color-error); margin-top: 15px; width: 100%;">WIPE ALL DATA</button>
+                </div>
+
+                <div id="faqPanelContent" class="chat-info-panel" style="display:none;">
+                    <h4>SUPPORT FAQ</h4>
+                    <p class="faq-q">Q: How is the High Score calculated?</p>
+                    <p class="faq-a">A: The High Score tracks your **fewest guesses** to successfully crack the code. Lower is better!</p>
+                    
+                    <p class="faq-q">Q: Why did I lose my Win Streak?</p>
+                    <p class="faq-a">A: Your streak resets to zero if you fail to guess the code within the allotted attempts or if you manually click the RESET button.</p>
+
+                    <p class="faq-q">Q: Is the secret code truly random?</p>
+                    <p class="faq-a">A: Yes. The system uses a standard JavaScript function to generate a cryptographically weak (but practically random) number between 1 and 100.</p>
+                    <p class="faq-q" style="color: #fff; margin-top: 15px;">**TECHNICAL SUPPORT**</p>
+                    <p class="faq-a">For immediate support, please WhatsApp our help desk at: **77189 78934**</p>
+                </div>
+
+                <div id="settingsPanelContent" class="chat-info-panel" style="display:none;">
+                    <h4>USER SETTINGS</h4>
+                    
+                    <div class="setting-row">
+                        <label for="themeToggle">Dark Protocol Mode</label>
+                        <input type="checkbox" id="themeToggle" checked disabled title="Default mode is currently locked." style="margin: 0; width: auto;">
+                    </div>
+                    
+                    <div class="setting-row">
+                        <label for="soundToggle">Sound Effects</label>
+                        <input type="checkbox" id="soundToggle" disabled title="Feature is currently offline." style="margin: 0; width: auto;">
+                    </div>
+                    
+                    <p style="text-align: center; font-size: 12px; opacity: 0.7; margin-top: 20px;">*Additional settings offline in V6.1</p>
+                </div>
+
+                <div id="lorePanelContent" class="chat-info-panel" style="display:none;">
+                    <h4>MISSION BRIEFING</h4>
+                    <p style="font-style: italic;">"You are a User. The "Guess Master" is not a game; it is a live decryption simulation. Your goal is to breach the target integer ('The Secret Code') before the attempt count is exhausted.</p>
+                    <p>Failure to adhere to the Attempt Status results in immediate system self-wipe. Good luck! The integrity of the network depends on your deduction skills."</p>
+                </div>
+
+                <button id="backToMenuBtn" class="chat-option-btn" style="background: #333; margin-top: 15px;" onclick="showChatMenu()">← BACK TO MAIN MENU</button>
+            </div>
         </div>
     </div>
 
-    <div id="footer">⚡ Developed by Aarav Sinha</div>
+
+    <div id="game-box">
+        <h2>🔬 Guess Master</h2>
+        
+        <p id="high-score-display">🏅 BEST SCORE: N/A</p>
+        
+        <div> 
+            
+            <label for="maxGuesses">Set Attempts (1 to 20):</label>
+            <input type="number" id="maxGuesses" min="1" max="20" placeholder="E.g., 7" value="7">
+            
+            <button id="startBtn" onclick="startGame()">▶️ ACTIVATE PROTOCOL</button>
+            
+            <div id="game" style="display:none;">
+                <p><b>Attempt Status:</b> <span id="attempt">0</span> / <span id="max"></span></p>
+                
+                <label for="guess">Enter Secret Code (1-100):</label>
+                <input type="number" id="guess" placeholder="Your Guess">
+                
+                <button id="submitBtn" onclick="checkGuess()">✔️ SUBMIT CODE</button>
+                <button id="restartBtn" onclick="restartGame()">RESET</button>
+                
+                <div class="msg" id="message"></div>
+            </div>
+        </div> 
+    </div>
+    
+    <div id="footer">
+        Developed by Aarav Sinha
+    </div>
     <script>
         let randomNumber, attempts, maxAttempts, gameActive;
-        let restartTimer, countdownTimer, confettiInterval;
+        let confettiInterval;
+        let redirectTimer; 
+        
+        let stats = {
+            gamesPlayed: 0,
+            wins: 0,
+            winStreak: 0,
+            longestStreak: 0
+        };
+
+        const highScoreDisplay = document.getElementById("high-score-display");
+        const messageElement = document.getElementById("message");
+        const historyList = document.getElementById("guesses-list");
+        
+        // Panel references
+        const instructionsBox = document.getElementById("instructions");
+        const historyPanel = document.getElementById("historyPanel");
+        
+        // Button references
+        const infoButton = document.getElementById("infoBtn");
+        const historyButton = document.getElementById("historyBtn");
+        const chatIcon = document.getElementById("chatIcon");
+
+        const guessInput = document.getElementById("guess");
+        const submitButton = document.getElementById("submitBtn");
+        
+        // Chat Modal references
+        const chatModal = document.getElementById("chatModal");
+        const chatMenuOptions = document.getElementById("chat-menu-options");
+        const chatContentArea = document.getElementById("chatContentArea");
+        const aiGreeting = document.getElementById("aiGreeting");
+        const infoPanels = {
+            stats: document.getElementById('statsPanelContent'),
+            faq: document.getElementById('faqPanelContent'),
+            settings: document.getElementById('settingsPanelContent'),
+            lore: document.getElementById('lorePanelContent')
+        };
+
+
+        // --- STATS & HIGH SCORE FUNCTIONS ---
+        function loadStats() {
+            const bestScore = localStorage.getItem('guessNumberHighScore');
+            highScoreDisplay.innerText = bestScore ? `🏅 BEST SCORE: ${bestScore} GUESSES` : `🏅 BEST SCORE: N/A`;
+
+            const savedStats = localStorage.getItem('guessNumberStats');
+            if (savedStats) {
+                stats = JSON.parse(savedStats);
+            }
+            updateStatsDisplay();
+        }
+
+        function saveStats() {
+            localStorage.setItem('guessNumberStats', JSON.stringify(stats));
+            updateStatsDisplay();
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById("stat-games").innerText = stats.gamesPlayed;
+            document.getElementById("stat-wins").innerText = stats.wins;
+            document.getElementById("stat-streak").innerText = stats.winStreak;
+            document.getElementById("stat-max-streak").innerText = stats.longestStreak;
+            
+            const winRate = stats.gamesPlayed === 0 ? 0 : ((stats.wins / stats.gamesPlayed) * 100).toFixed(1);
+            document.getElementById("stat-winrate").innerText = `${winRate}%`;
+        }
+
+        window.resetAllStats = function() {
+            if (confirm("⚠️ SECURITY PROTOCOL: Are you sure you want to wipe ALL game statistics (High Score, Stats, and Streaks)? This action cannot be undone.")) {
+                localStorage.removeItem('guessNumberHighScore');
+                localStorage.removeItem('guessNumberStats');
+                stats = { gamesPlayed: 0, wins: 0, winStreak: 0, longestStreak: 0 };
+                loadStats();
+                restartGame();
+            }
+        }
+        
+        loadStats();
+        // -------------------------------------
+        
+        // --- CHAT MODAL FUNCTIONS (V6.0) ---
+        
+        window.toggleChatModal = function() {
+            chatModal.classList.toggle('visible');
+            if (chatModal.classList.contains('visible')) {
+                // Ensure other fixed panels are closed when chat opens
+                instructionsBox.classList.remove('visible');
+                historyPanel.classList.remove('visible');
+                showChatMenu(); // Always return to the main menu/greeting
+            }
+        }
+
+        window.closeChatModal = function() {
+            chatModal.classList.remove('visible');
+        }
+
+        window.showChatMenu = function() {
+            chatMenuOptions.style.display = 'block';
+            chatContentArea.style.display = 'none';
+            aiGreeting.style.display = 'block';
+            Object.values(infoPanels).forEach(p => p.style.display = 'none');
+            // Scroll to bottom/greeting when opening menu
+            document.getElementById('chatBody').scrollTop = 0;
+        }
+
+        window.showChatContent = function(panelName) {
+            chatMenuOptions.style.display = 'none';
+            aiGreeting.style.display = 'none';
+            chatContentArea.style.display = 'block';
+            
+            // Hide all panels
+            Object.values(infoPanels).forEach(p => p.style.display = 'none');
+
+            // Show the requested panel
+            const panel = infoPanels[panelName];
+            if (panel) {
+                panel.style.display = 'block';
+            }
+            // Scroll content area to top
+            document.getElementById('chatBody').scrollTop = 0;
+        }
+        
+        // --- GAME LOGIC FUNCTIONS (Standard) ---
 
         function startGame() {
             clearTimersAndEffects();
@@ -152,10 +578,11 @@
             maxAttempts = parseInt(document.getElementById("maxGuesses").value);
 
             if (isNaN(maxAttempts) || maxAttempts < 1 || maxAttempts > 20) {
-                alert("⚠️ Please enter a number of guesses between 1 and 20.");
+                alert("⚠️ PROTOCOL ALERT: Please set attempts between 1 and 20.");
                 return;
             }
 
+            // Generate a random number between 1 and 100 (inclusive)
             randomNumber = Math.floor(Math.random() * 100) + 1;
             attempts = 0;
             gameActive = true;
@@ -163,81 +590,184 @@
             document.getElementById("game").style.display = "block";
             document.getElementById("max").innerText = maxAttempts;
             document.getElementById("attempt").innerText = attempts;
-            document.getElementById("message").innerText = "🎮 Game Started! Good Luck!";
-            document.getElementById("guess").value = "";
+            
+            messageElement.innerText = "🎮 Protocol Activated. Awaiting first input...";
+            messageElement.className = 'msg';
+            guessInput.value = "";
+            guessInput.focus();
 
             document.getElementById("maxGuesses").setAttribute("disabled", true);
             document.getElementById("startBtn").style.display = "none";
             
-            document.getElementById("timer-container").innerHTML = "";
+            // Show all fixed buttons except history (which is shown later)
+            document.getElementById("infoBtn").style.display = "none";
+            document.getElementById("chatIcon").style.display = "none";
+            document.getElementById("historyBtn").style.display = "inline-block";
+            
+            // Enable inputs/buttons
+            guessInput.removeAttribute("disabled");
+            submitButton.removeAttribute("disabled");
+            
+            // Clear history and panels
+            historyList.innerHTML = "No attempts logged yet.";
+            instructionsBox.classList.remove('visible'); 
+            historyPanel.classList.remove('visible');
+            closeChatModal();
+
+            // Increment games played at the start
+            stats.gamesPlayed++;
+            saveStats();
         }
 
         function checkGuess() {
             if (!gameActive) return;
 
-            const guess = parseInt(document.getElementById("guess").value);
+            const guess = parseInt(guessInput.value);
+            
+            messageElement.className = 'msg'; 
+
             if (isNaN(guess) || guess < 1 || guess > 100) {
-                document.getElementById("message").innerText = "⚠️ Enter a number between 1 and 100!";
+                messageElement.innerText = "⚠️ Input Error: Code must be between 1 and 100.";
                 return;
             }
 
             attempts++;
             document.getElementById("attempt").innerText = attempts;
 
+            let colorClass = '';
+            let hintText = '';
+            let feedbackIcon = '';
+            let gameEnded = false;
+            let proximity = Math.abs(guess - randomNumber);
+
+            // --- Original Feedback Logic (Concise) ---
             if (guess === randomNumber) {
-                document.getElementById("message").innerText = "🎉 Hoorayyy! You got the number!";
-                gameActive = false;
+                colorClass = 'win';
+                hintText = "SUCCESS!";
+                feedbackIcon = '🏆';
+                messageElement.innerText = `✅ SUCCESS! Target acquired in ${attempts} attempts. Mission complete.`;
+                gameEnded = true;
+                
+                // Stats Update: Win
+                stats.wins++;
+                stats.winStreak++;
+                if (stats.winStreak > stats.longestStreak) {
+                    stats.longestStreak = stats.winStreak;
+                }
+                
+                const currentHighScore = parseInt(localStorage.getItem('guessNumberHighScore')) || Infinity;
+                if (attempts < currentHighScore) {
+                    localStorage.setItem('guessNumberHighScore', attempts);
+                    loadStats();
+                    messageElement.innerText += " (NEW RECORD)";
+                }
+                
                 startConfetti();
-                startAutoRestartTimer();
+
             } else if (attempts >= maxAttempts) {
-                document.getElementById("message").innerText = `❌ Out of guesses! The number was ${randomNumber}`;
-                gameActive = false;
-                // Confetti is no longer called on a failed guess.
-                startAutoRestartTimer();
-            } else if (guess > randomNumber + 15) {
-                document.getElementById("message").innerText = "⬆️ Too High!";
-            } else if (guess < randomNumber - 20) {
-                document.getElementById("message").innerText = "⬇️ Too Low!";
-            } else if (guess > randomNumber - 20 && guess < randomNumber) {
-                document.getElementById("message").innerText = "✨ Almost! But still low.";
-            } else if (guess < randomNumber + 20 && guess > randomNumber) {
-                document.getElementById("message").innerText = "✨ Almost! But still high.";
+                colorClass = 'lose';
+                hintText = "FAILURE";
+                feedbackIcon = '❌';
+                messageElement.innerText = `❌ FAILURE. Secret code was ${randomNumber}. Resetting system...`;
+                gameEnded = true;
+
+                // Stats Update: Loss
+                stats.winStreak = 0;
+                
+            } else if (guess > randomNumber) {
+                // Too High: more than 20 away
+                const tooHigh = proximity > 20; 
+                colorClass = tooHigh ? 'high' : 'almost';
+                hintText = tooHigh ? "TOO HIGH" : "Almost High";
+                feedbackIcon = tooHigh ? '⬆️' : '✨';
+                messageElement.innerText = tooHigh ? "⬆️ Code TOO HIGH. Adjust down." : "✨ Proximity Alert: High. Minor adjustment needed.";
+
+            } else if (guess < randomNumber) {
+                // Too Low: more than 20 away
+                const tooLow = proximity > 20; 
+                colorClass = tooLow ? 'low' : 'almost';
+                hintText = tooLow ? "TOO LOW" : "Almost Low";
+                feedbackIcon = tooLow ? '⬇️' : '✨';
+                messageElement.innerText = tooLow ? "⬇️ Code TOO LOW. Adjust up." : "✨ Proximity Alert: Low. Minor adjustment needed.";
             }
+            
+            messageElement.classList.add(colorClass);
+
+            // Log the guess to the history panel
+            const newEntry = document.createElement("div");
+            newEntry.className = "history-entry";
+            newEntry.innerHTML = `#${attempts}: <strong>${guess}</strong> (${feedbackIcon} ${hintText})`;
+            
+            if (attempts === 1 && historyList.innerHTML.includes("No attempts logged")) {
+                historyList.innerHTML = '';
+            }
+
+            historyList.prepend(newEntry);
+            historyList.scrollTop = 0;
+            
+            guessInput.value = ""; 
+            guessInput.focus();
+
+            if (gameEnded) {
+                gameActive = false;
+                guessInput.setAttribute("disabled", true);
+                submitButton.setAttribute("disabled", true);
+                startRedirectTimer();
+                saveStats(); 
+            }
+        }
+
+        function startRedirectTimer() {
+            let timeLeft = 5;
+            const countdownSpan = document.createElement('span');
+            countdownSpan.id = 'countdown';
+            countdownSpan.innerText = ` (Redirecting in ${timeLeft}s...)`;
+            messageElement.appendChild(countdownSpan);
+
+            redirectTimer = setInterval(() => {
+                timeLeft--;
+                countdownSpan.innerText = ` (Redirecting in ${timeLeft}s...)`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(redirectTimer);
+                    restartGame();
+                }
+            }, 1000);
         }
 
         function restartGame() {
             clearTimersAndEffects();
             
             document.getElementById("game").style.display = "none";
-            document.getElementById("maxGuesses").value = "";
+            document.getElementById("maxGuesses").value = "7";
             document.getElementById("guess").value = "";
-            document.getElementById("message").innerText = "";
+            messageElement.innerText = "";
+            messageElement.className = 'msg'; // Clear color class
             document.getElementById("maxGuesses").removeAttribute("disabled");
             document.getElementById("startBtn").style.display = "inline-block";
+            
+            // Show all main buttons again
+            document.getElementById("infoBtn").style.display = "inline-block";
+            document.getElementById("chatIcon").style.display = "inline-block";
+            document.getElementById("historyBtn").style.display = "none"; 
+
+            // Hide all fixed panels
+            instructionsBox.classList.remove('visible'); 
+            historyPanel.classList.remove('visible');
+            closeChatModal();
+            
+            guessInput.removeAttribute("disabled");
+            submitButton.removeAttribute("disabled");
+            
+            gameActive = false;
         }
 
         function clearTimersAndEffects() {
-            clearTimeout(restartTimer);
-            clearInterval(countdownTimer);
             clearInterval(confettiInterval);
+            clearInterval(redirectTimer);
             
             const allConfetti = document.querySelectorAll(".confetti");
             allConfetti.forEach(c => c.remove());
-        }
-
-        function startAutoRestartTimer() {
-            let timeLeft = 10;
-            document.getElementById("timer-container").innerHTML = `<p><b>Redirecting in:</b> <span id="timer">${timeLeft}</span></p>`;
-            
-            const timerSpan = document.getElementById("timer");
-            countdownTimer = setInterval(() => {
-                timeLeft--;
-                timerSpan.innerText = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(countdownTimer);
-                    restartGame();
-                }
-            }, 1000);
         }
         
         function startConfetti() {
@@ -252,7 +782,48 @@
                     setTimeout(() => confetti.remove(), 2500); 
                 }
             }, 200);
+            setTimeout(() => clearInterval(confettiInterval), 3000);
         }
+        
+        // --- JAVASCRIPT FOR RULES/HISTORY PANEL VISIBILITY ---
+        
+        function togglePanel(panel) {
+            // List of ALL fixed panels
+            const panels = [instructionsBox, historyPanel];
+        
+            // Close all other fixed panels
+            panels.forEach(p => {
+                if (p !== panel && p.classList.contains('visible')) {
+                    p.classList.remove('visible');
+                }
+            });
+            
+            // Toggle the requested panel
+            panel.classList.toggle('visible');
+            
+            // Close chat modal if any fixed panel is opened
+            if (panel.classList.contains('visible')) {
+                closeChatModal();
+            }
+        }
+        
+        // --- EVENT LISTENERS ---
+        
+        // Add Event Listeners to fixed buttons
+        infoButton.addEventListener('click', () => togglePanel(instructionsBox));
+        historyButton.addEventListener('click', () => togglePanel(historyPanel));
+
+        // Allow hitting Enter to submit the guess
+        guessInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                if (gameActive) {
+                    checkGuess();
+                } else if (document.getElementById("startBtn").style.display !== "none") {
+                    // If the start button is visible (pre-game), start the game using the maxGuesses input
+                    startGame();
+                }
+            }
+        });
     </script>
 </body>
 </html>
